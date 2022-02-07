@@ -1,0 +1,2 @@
+File=d1.txt; WordPattern=^[0-9]{4}$
+File=d2.txt; WordPattern=^[a-zA-Z]{5}$
