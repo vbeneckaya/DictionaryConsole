@@ -1,3 +1,5 @@
+package word;
+
 public class Dict {
     public Dict(String file, String wordPattern){
         this.File = file;

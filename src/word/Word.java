@@ -1,10 +1,12 @@
+package word;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
 public class Word {
-    enum Commands {EXIT, ALL, ADD, FIND, DELETE}
+    public enum Commands {EXIT, ALL, ADD, FIND, DELETE}
 
     private static List<Dict> _validDictionaries;
     private static String _dictionaryTypesFile = "./src/DictionaryTypes.txt";

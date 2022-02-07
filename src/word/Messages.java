@@ -1,3 +1,5 @@
+package word;
+
 public class Messages {
     public static String NotEnoughArguments = "Not enough arguments";
     public static String WrongArgument = "Wrong argument";

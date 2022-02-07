@@ -1,6 +1,12 @@
+package tests;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import word.Dict;
+import word.DictConfig;
+import word.Messages;
+import word.Word;
 
 import java.io.IOException;
 import java.nio.file.Files;
