@@ -1,4 +1,3 @@
-
 import com.dict.console.DictConsoleService;
 import com.dict.console.Messages;
 import com.dict.console.dictionary.Dict;

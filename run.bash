@@ -24,7 +24,7 @@ javac  -sourcepath src/main/java   src/main/java/com/dict/app/Word.java -d ./tar
 cp ./src/main/res/DictionaryTypes.txt ./target/res/ || exit
 
 cp ./src/test/res/DictionaryTypes.txt ./target/test/res || exit
-javac   ./src/test/MyTest.java -d ./target/test -cp ./target || exit
+javac   ./src/test/MyTest.java -d ./target/test -cp ./target:/Library/Java/Extensions/junit-4.12.jar:/Library/Java/Extensions/hamcrest-core-1.3.jar || exit
 
 #cd ./target || exit
 #

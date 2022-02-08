@@ -25,9 +25,9 @@ cp ./src/main/res/DictionaryTypes.txt ./target/res/ || exit
 
 cp ./src/test/res/DictionaryTypes.txt ./target/test/res || exit
 echo $CLASSPATH
-javac   ./src/test/MyTest.java -d ./target/test -cp ./target || exit
+javac   ./src/test/MyTest.java -d ./target/test -cp ./target:/Library/Java/Extensions/junit-4.12.jar:/Library/Java/Extensions/hamcrest-core-1.3.jar || exit
 
-#cd ./target || exit
+cd ./target/test || exit
 #
-java org.junit.runner.JUnitCore ./target/test/MyTest.java
+java org.junit.runner.JUnitCore MyTest
 #junit
