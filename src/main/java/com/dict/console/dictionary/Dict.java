@@ -1,4 +1,4 @@
-package word;
+package com.dict.console.dictionary;
 
 public class Dict {
     public Dict(String file, String wordPattern){
@@ -8,7 +8,7 @@ public class Dict {
     public String WordPattern;
     public String File;
 
-    public void Add(DictConfig data){
+    public void Add(DictActionRequest data){
 
     }
 
