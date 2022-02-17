@@ -24,6 +24,7 @@ javac  -sourcepath src/main/java   src/main/java/com/dict/app/Word.java -d ./tar
 cp ./src/main/res/DictionaryTypes.txt ./target/res/ || exit
 
 cp ./src/test/res/DictionaryTypes.txt ./target/test/res || exit
+echo $CLASSPATH
 javac   ./src/test/MyTest.java -d ./target/test -cp ./target || exit
 
 #cd ./target || exit
