@@ -1,3 +1,3 @@
 package com.dict.console.dictionary;
 
-public enum Commands {EXIT, ALL, ADD, FIND, DELETE}
+public enum Commands {ALL, ADD, FIND, DELETE}
