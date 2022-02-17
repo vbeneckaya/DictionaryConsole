@@ -1,4 +1,4 @@
-package com.dict.console.dictConsole;
+package com.dict.console;
 
 public class Messages {
     public static String NotEnoughArguments = "Not enough arguments";

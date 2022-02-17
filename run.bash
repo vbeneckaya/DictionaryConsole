@@ -23,14 +23,11 @@ fi
 javac  -sourcepath src/main/java   src/main/java/com/dict/app/Word.java -d ./target -cp ./target || exit
 cp ./src/main/res/DictionaryTypes.txt ./target/res/ || exit
 
+cp ./src/test/res/DictionaryTypes.txt ./target/test/res || exit
+echo $CLASSPATH
+javac   ./src/test/MyTest.java -d ./target/test -cp ./target:/Library/Java/Extensions/junit-4.12.jar:/Library/Java/Extensions/hamcrest-core-1.3.jar || exit
 
-java -cp ./target    com.dict.app.Word
-
-#cp ./src/test/res/DictionaryTypes.txt ./target/test/res || exit
-#echo $CLASSPATH
-#javac   ./src/test/MyTest.java -d ./target/test -cp ./target:/Library/Java/Extensions/junit-4.12.jar:/Library/Java/Extensions/hamcrest-core-1.3.jar || exit
+cd ./target/test || exit
 #
-#cd ./target/test || exit
-
-#java org.junit.runner.JUnitCore MyTest
+java org.junit.runner.JUnitCore MyTest
 #junit

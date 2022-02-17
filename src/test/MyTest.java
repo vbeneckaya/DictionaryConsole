@@ -1,12 +1,10 @@
-import com.dict.console.dictConsole.DictConsoleService;
-import com.dict.console.dictConsole.Messages;
+import com.dict.console.DictConsoleService;
+import com.dict.console.Messages;
 import com.dict.console.dictionary.Dict;
 import com.dict.console.dictionary.DictService;
 import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,31 +16,22 @@ import java.util.HashMap;
 import static org.junit.Assert.*;
 
 public class MyTest {
-    enum Commands {ALL, ADD, FIND, DELETE}
+    enum Commands {EXIT, ALL, ADD, FIND, DELETE}
 
     private static String DictionaryTypesFilePath = "./src/test/res/DictionaryTypes.txt";
-    private static String DictionaryRootPath;
-
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
-
+    private static String DictionaryRootPath = "./src/";
 
     @Before
     public void Init() {
-  //      DictionaryRootPath = folder.getRoot().getPath();
-        DictionaryRootPath = "./src/test";
-
-
         var validDictionaries = new ArrayList<Dict>();
-        validDictionaries.add(new Dict("d1.txt", "^[0-9]{4}$", DictionaryRootPath));
-        validDictionaries.add(new Dict("d2.txt", "^[a-zA-Z]{5}$", DictionaryRootPath));
+        validDictionaries.add(new Dict("d1.txt", "^[0-9]{4}$"));
+        validDictionaries.add(new Dict("d2.txt", "^[a-zA-Z]{5}$"));
         DictConsoleService.init(validDictionaries);
-
-
     }
 
     @Test
     public void TestCommands() {
+        assertEquals(Commands.EXIT.name(), Commands.EXIT.name());
         assertEquals(Commands.ALL.name(), Commands.ALL.name());
         assertEquals(Commands.ADD.name(), Commands.ADD.name());
         assertEquals(Commands.FIND.name(), Commands.FIND.name());
@@ -69,97 +58,41 @@ public class MyTest {
         assertArrayEquals(expected.toArray(), actual.toArray());
     }
 
-    @Test
-    public void TestAll(){
-        var consoleCommand = "all --dn=d1 --key=123";
-        var dictActionRequest = DictConsoleService.createActionRequestFromCommandLine(consoleCommand);
-        var resValue = DictService.getDictionaryByFileName(dictActionRequest.Dn).all();
-        System.out.println(resValue);
-    }
-
-    @Test
-    public void TestFind(){
-
-        var consoleCommand = "delete --dn=d1 --key=123";
-        var dictActionRequest = DictConsoleService.createActionRequestFromCommandLine(consoleCommand);
-        DictService.getDictionaryByFileName(dictActionRequest.Dn).delete(dictActionRequest.Key);
-        consoleCommand = "find --dn=d1 --key=123";
-        dictActionRequest = DictConsoleService.createActionRequestFromCommandLine(consoleCommand);
-        var resValue = DictService.getDictionaryByFileName(dictActionRequest.Dn).find(dictActionRequest.Key);
-        System.out.println(resValue);
-        assertEquals("", resValue);
-
-
-        singleAdd("add --dn=d1 --key=123 --value=1234");
-         consoleCommand = "find --dn=d1 --key=123";
-         dictActionRequest = DictConsoleService.createActionRequestFromCommandLine(consoleCommand);
-         resValue = DictService.getDictionaryByFileName(dictActionRequest.Dn).find(dictActionRequest.Key);
-        System.out.println(resValue);
-        assertEquals("123 1234", resValue);
-    }
-
-    @Test
-    public void TestDelete(){
-        singleAdd("add --dn=d1 --key=123 --value=1234");
-        singleAdd("add --dn=d1 --key=124 --value=1235");
-        singleAdd("add --dn=d1 --key=125 --value=1236");
-
-        var consoleCommand = "delete --dn=d1 --key=123";
-        var dictActionRequest = DictConsoleService.createActionRequestFromCommandLine(consoleCommand);
-        DictService.getDictionaryByFileName(dictActionRequest.Dn).delete(dictActionRequest.Key);
-
-        consoleCommand = "find --dn=d1 --key=123";
-        dictActionRequest = DictConsoleService.createActionRequestFromCommandLine(consoleCommand);
-        var resValue = DictService.getDictionaryByFileName(dictActionRequest.Dn).find(dictActionRequest.Key);
-        System.out.println(resValue);
-        assertEquals("", resValue);
-    }
-
 
     @Test
     public void TestAdd() {
-        singleAdd("add --dn=d1 --key=123 --value=1234");
-        singleAdd("add --dn=d1 --key=124 --value=1235");
-        singleAdd("add --dn=d1 --key=125 --value=1236");
-    }
-
-    private void singleAdd(String consoleCommand){
-        var dictActionRequest = DictConsoleService.createActionRequestFromCommandLine(consoleCommand);
+        var dictActionRequest = DictConsoleService.createActionRequestFromCommandLine("add --dn=d1 --key=123 --value=1234");
         var shouldBeAdded = false;
-        var initialLinesCount = 0;
-
+        if (dictActionRequest.Valid)
             try {
                 if (!Files.exists(Paths.get(DictionaryRootPath, dictActionRequest.Dn))) {
-                    shouldBeAdded = dictActionRequest.Valid;
-
+                    shouldBeAdded = true;
                 } else {
-                    var fileLines = Files.readAllLines(Paths.get(DictionaryRootPath, dictActionRequest.Dn));
-                    initialLinesCount = fileLines.size();
-                    shouldBeAdded = fileLines.stream().filter(l -> l.matches("^" + dictActionRequest.Key + " .*")).findFirst().isEmpty() && dictActionRequest.Valid;
+                    var file = Files.readString(Paths.get(DictionaryRootPath, dictActionRequest.Dn));
+                    var matchesKey = file.matches(dictActionRequest.Key);
+                    var matchesKeyValue = file.matches(dictActionRequest.Key + " " + dictActionRequest.Value);
+
+                    if (!matchesKey && !matchesKeyValue) {
+                        shouldBeAdded = true;
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-        DictService.getDictionaryByFileName(dictActionRequest.Dn).add(dictActionRequest.Key, dictActionRequest.Value);
+        DictService.getDictionaryByFileName(dictActionRequest.Dn).Add(dictActionRequest);
 
-        var newLinesCount = 0;
-        var matchesKeyAfter = false;
         try {
-            if (Files.exists(Paths.get(DictionaryRootPath, dictActionRequest.Dn))) {
-                var fLines = Files.readAllLines(Paths.get(DictionaryRootPath, dictActionRequest.Dn));
-                matchesKeyAfter = fLines.stream().anyMatch(l -> l.matches("^" + dictActionRequest.Key + " .*"));
-                newLinesCount = fLines.size();
-            }
-
-            if (shouldBeAdded) {
-                System.out.println("should be added");
-                assertEquals(true, matchesKeyAfter);
-                assertNotEquals(initialLinesCount, newLinesCount);
+            boolean matchesKeyValue;
+            if (!Files.exists(Paths.get(DictionaryRootPath, dictActionRequest.Dn))) {
+                matchesKeyValue = false;
             } else {
-                System.out.println("should not be added");
-                assertEquals(initialLinesCount, newLinesCount);
+                var file = Files.readString(Paths.get(DictionaryRootPath, dictActionRequest.Dn));
+                matchesKeyValue = file.matches(dictActionRequest.Key + " " + dictActionRequest.Value);
             }
+            System.out.println(shouldBeAdded);
+            System.out.println(matchesKeyValue);
+            assertEquals(shouldBeAdded, matchesKeyValue);
         } catch (
                 IOException e) {
             e.printStackTrace();
@@ -169,14 +102,7 @@ public class MyTest {
     @Ignore
     @Test
     public void T() {
-        //System.out.println("1234".matches("^[0-9]{4}$"));
-        var a = "d1.txt".split("\\.");
-
-        for (String s: a
-             ) {
-            System.out.println(s);
-        }
-      //  System.out.println("d1.txt".split("."));
+        System.out.println("1234".matches("^[0-9]{4}$"));
         //System.out.println("--dn=".matches("^--dn=.*"));
     }
 
@@ -199,19 +125,20 @@ public class MyTest {
 
 
         strings.forEach((k, v) -> {
+                    System.out.println(k);
                     var actual = DictConsoleService.createActionRequestFromCommandLine(k);
                     assertEquals(v, actual.Message);
                 }
         );
 
         var stringsCommand = new HashMap<String, Enum>();
-//        stringsCommand.put("exit", Commands.EXIT);
-//        stringsCommand.put("exit ssdf", Commands.EXIT);
-//        stringsCommand.put("exit --dn", Commands.EXIT);
-//        stringsCommand.put("exit --dn=", Commands.EXIT);
-//        stringsCommand.put("exit --dn=34", Commands.EXIT);
-//        stringsCommand.put("exit --dn=34 dflkvln", Commands.EXIT);
-//        stringsCommand.put("23424 exit --dn=34 dflkvln", Commands.EXIT);
+        stringsCommand.put("exit", Commands.EXIT);
+        stringsCommand.put("exit ssdf", Commands.EXIT);
+        stringsCommand.put("exit --dn", Commands.EXIT);
+        stringsCommand.put("exit --dn=", Commands.EXIT);
+        stringsCommand.put("exit --dn=34", Commands.EXIT);
+        stringsCommand.put("exit --dn=34 dflkvln", Commands.EXIT);
+        stringsCommand.put("23424 exit --dn=34 dflkvln", Commands.EXIT);
 
         stringsCommand.put("all", Commands.ALL);
         stringsCommand.put("all ssdf", Commands.ALL);
@@ -247,7 +174,7 @@ public class MyTest {
 
         stringsCommand.forEach((k, v) -> {
                     System.out.println(k);
-                    var actual = DictConsoleService.createActionRequestFromCommandLine(k);
+                    var actual =  DictConsoleService.createActionRequestFromCommandLine(k);
                     System.out.println(actual.Message);
                     System.out.println(actual.Valid);
                     System.out.println(actual.Command);
@@ -286,7 +213,7 @@ public class MyTest {
         stringsKey.put("23424 exit --dn=34 dflkvln", null);
         stringsKey.forEach((k, v) -> {
                     System.out.println(k);
-                    var actual = DictConsoleService.createActionRequestFromCommandLine(k);
+                    var actual =  DictConsoleService.createActionRequestFromCommandLine(k);
                     assertEquals(v, actual.Key);
                 }
         );
@@ -312,7 +239,7 @@ public class MyTest {
         stringsValue.put("23424 exit --dn=34 --value=eeeee", null);
         stringsValue.forEach((k, v) -> {
                     System.out.println(k);
-                    var actual = DictConsoleService.createActionRequestFromCommandLine(k);
+                    var actual =  DictConsoleService.createActionRequestFromCommandLine(k);
                     assertEquals(v, actual.Value);
                 }
         );
