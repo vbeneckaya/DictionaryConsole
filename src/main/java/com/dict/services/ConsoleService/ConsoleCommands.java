@@ -1,4 +1,4 @@
-package com.dict.console.dictConsole;
+package com.dict.services.ConsoleService;
 
 public  class ConsoleCommands {
     public static String Exit = "^exit$";
