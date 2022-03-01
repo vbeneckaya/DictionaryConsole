@@ -1,6 +1,6 @@
 package com.dict.services.DictionaryService;
 
-import org.jetbrains.annotations.NotNull;
+import com.dict.services.Storage;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Dict {
+public class Dict implements Storage {
     public Dict(String file, String wordPattern, String rootPath) {
         this.file = file;
         this.wordPattern = wordPattern;
@@ -22,12 +22,22 @@ public class Dict {
     public String file;
     public Path path;
 
-    public void add(String key, String value) {
+    public void insert(String key, String value) {
         writeToFile(key, value);
     }
 
-    public String all() {
+    public String readAll() {
         return readFromFile();
+    }
+
+    @Override
+    public String getName() {
+        return file.split("\\.")[0];
+    }
+
+    @Override
+    public String getStorageFullName() {
+        return file;
     }
 
     public String find(String key) {
@@ -86,7 +96,7 @@ public class Dict {
         }
     }
 
-    private @NotNull List<String> readLinesFromFile() {
+    private List<String> readLinesFromFile() {
         if (!Files.exists(path)) {
             return new ArrayList<>();
         }

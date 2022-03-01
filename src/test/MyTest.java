@@ -1,22 +1,3 @@
-import com.dict.services.ConsoleService.ConsoleService;
-import com.dict.services.ConsoleService.Messages;
-import com.dict.services.DictionaryService.Dict;
-import com.dict.services.DictionaryService.DictService;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-
-import static org.junit.Assert.*;
-
 public class MyTest {
 //    enum Commands {ALL, ADD, FIND, DELETE}
 //

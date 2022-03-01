@@ -1,41 +1,42 @@
 package com.dict.services.ConsoleService;
 
-import com.dict.services.DictionaryService.Commands;
-import com.dict.services.DictionaryService.DictServiceActionRequest;
-import com.dict.services.DictionaryService.DictService;
+import com.dict.services.StoragePool;
+import com.dict.services.DictionaryService.*;
 
 import java.util.Arrays;
 import java.util.Locale;
 
 
-public class ConsoleService extends DictService {
+public class ConsoleService {
 
-    private static boolean isRunning;
+    private  boolean isRunning;
 
-    public static boolean isRunning() {
+    public  boolean isRunning() {
         return isRunning;
     }
 
-    public static void stop() {
+    public  void stop() {
         isRunning = false;
     }
 
-    public static void run() {
+    StoragePool storagePool = new DictPool();
+
+    public  void run() {
         isRunning = true;
-        ConsoleService.init();
-        ConsoleService.help();
+        storagePool.init();
+        help();
 
         while (isRunning()) {
-            ConsoleService.welcome();
+            welcome();
             var commandString = System.console().readLine();
 
-            if (ConsoleService.isExit(commandString)) {
+            if (isExit(commandString)) {
                 stop();
             } else {
-                var request = ConsoleService.createActionRequestFromCommandLine(commandString);
+                var request = createActionRequestFromCommandLine(commandString);
 
                 if (request.valid) {
-                    var response = ConsoleService.executeActionRequest(request);
+                    var response = storagePool.executeActionRequest(request);
                     if (response.success) {
                         System.out.println("Success");
                         System.out.println(response.result != null ? response.result : "Without result");
@@ -49,11 +50,11 @@ public class ConsoleService extends DictService {
         }
     }
 
-    private static DictServiceActionRequest createActionRequestFromCommandLine(String commandString) {
+    private ActionRequest createActionRequestFromCommandLine(String commandString) {
         var args = commandString.toLowerCase(Locale.ROOT).split(" ");
         Arrays.sort(args);
 
-        var request = new DictServiceActionRequest();
+        var request = new ActionRequest();
 
         if (args.length < 1 || args[0].equals("")) {
             request.message = Messages.NotEnoughArguments;
@@ -76,7 +77,7 @@ public class ConsoleService extends DictService {
                 } else {
                     var val = arg.split(ConsoleCommands.ParamSeparator)[1];
 
-                    request.dn = validDictionaryName(val);
+                    request.dn = storagePool.validDictionaryName(val);
                     if (request.dn == null) {
                         request.message = Messages.NoSuchDictionary;
                         request.valid = false;
@@ -98,7 +99,7 @@ public class ConsoleService extends DictService {
                     request.valid = false;
                 } else {
                     var val = arg.split(ConsoleCommands.ParamSeparator)[1];
-                    if (isValidDictionaryWord(request.dn, val)) {
+                    if (storagePool.isValidDictionaryWord(request.dn, val)) {
                         request.value = val;
                     } else {
                         request.valid = false;
@@ -114,15 +115,15 @@ public class ConsoleService extends DictService {
     }
 
 
-    private static boolean isExit(String command) {
+    private  boolean isExit(String command) {
         return command.matches(ConsoleCommands.Exit);
     }
 
-    private static void help() {
+    private  void help() {
         System.out.println(Messages.Help);
     }
 
-    private static void welcome() {
+    private  void welcome() {
         System.out.println(Messages.Welcome);
     }
 }
