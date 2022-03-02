@@ -1,6 +1,7 @@
-package com.dict.services.DictionaryService;
+package com.dict.dictionary.storage;
 
-import com.dict.services.Storage;
+import com.dict.dictionary.storage.reader.Record;
+import com.dict.dictionary.storage.reader.Word;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,38 +12,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Dict implements Storage {
-    public Dict(String file, String wordPattern, String rootPath) {
-        this.file = file;
-        this.wordPattern = wordPattern;
-        this.path = Paths.get(rootPath,file);
-    }
-
+public class DictionaryStorageEntity {
     public String wordPattern;
     public String file;
     public Path path;
+
+    public DictionaryStorageEntity(String file, String wordPattern, String rootPath) {
+        this.wordPattern = wordPattern;
+        this.file = file;
+        this.path = Paths.get(rootPath, file);
+        ;
+    }
 
     public void insert(String key, String value) {
         writeToFile(key, value);
     }
 
-    public String readAll() {
-        return readFromFile();
+    public List<Record> readAll() {
+        return readLinesFromFile().stream().map(l -> mapStringToRecord(l)).collect(Collectors.toList());
     }
 
-    @Override
     public String getName() {
         return file.split("\\.")[0];
     }
 
-    @Override
-    public String getStorageFullName() {
-        return file;
-    }
-
-    public String find(String key) {
+    public List<Record> find(String key) {
         var existLines = readLinesFromFile();
-        return existLines.stream().filter(e -> e.matches(getKeyRegexp(key))).findFirst().orElse("");
+        return existLines.stream().filter(e -> e.matches(getKeyRegexp(key))).map(l -> mapStringToRecord(l)).collect(Collectors.toList());
     }
 
     public void delete(String key) {
@@ -52,19 +48,17 @@ public class Dict implements Storage {
         for (String line : newLines) {
             resString.append(line);
         }
-        if (!resString.toString().equals("")) {
-            writeToFile(resString.toString());
-        }
+
+        writeToFile(resString.toString());
     }
 
-    public boolean isValidDictionaryWord(String value){
+    public boolean isValidStorageEntityWord(String value) {
         return value.matches(wordPattern);
     }
 
-    public boolean isValidDictionaryName(String name){
-        return file.matches("^" + name + "(\\..+)?$");
+    public boolean isValidStorageEntityName(String name) {
+        return name.equals(getName());
     }
-
 
     private void writeToFile(String data) {
         try {
@@ -105,20 +99,16 @@ public class Dict implements Storage {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return  new ArrayList<>();
-    }
-
-    private String readFromFile() {
-        try {
-            return Files.readString(path);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return new ArrayList<>();
     }
 
     private String getKeyRegexp(String key) {
         return "^" + key + " .*";
+    }
+
+    private Record mapStringToRecord(String line) {
+        var splits = line.split(" ");
+        return new Word(splits[0], splits[1]);
     }
 
 
@@ -131,9 +121,8 @@ public class Dict implements Storage {
             return true;
         }
 
-        Dict d = (Dict) o;
+        DictionaryStorageEntity d = (DictionaryStorageEntity) o;
 
         return (this.file.equals(d.file) && this.wordPattern.equals(d.wordPattern));
     }
 }
-

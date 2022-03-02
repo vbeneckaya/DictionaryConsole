@@ -1,60 +1,60 @@
-package com.dict.services.ConsoleService;
+package com.dict.console;
 
-import com.dict.services.StoragePool;
-import com.dict.services.DictionaryService.*;
+import com.dict.dictionary.DictionaryClient;
+import com.dict.dictionary.DictionaryClientRequest;
+import com.dict.dictionary.DictionaryClientCommands;
+
 
 import java.util.Arrays;
 import java.util.Locale;
 
+public class ConsoleRunner {
+    private boolean isRunning;
 
-public class ConsoleService {
-
-    private  boolean isRunning;
-
-    public  boolean isRunning() {
+    public boolean isRunning() {
         return isRunning;
     }
 
-    public  void stop() {
+    public void stop() {
         isRunning = false;
     }
 
-    StoragePool storagePool = new DictPool();
+    DictionaryClient dictionaryClient = new DictionaryClient();
 
-    public  void run() {
+    public void run() {
         isRunning = true;
-        storagePool.init();
         help();
 
         while (isRunning()) {
             welcome();
             var commandString = System.console().readLine();
 
-            if (isExit(commandString)) {
-                stop();
-            } else {
-                var request = createActionRequestFromCommandLine(commandString);
-
-                if (request.valid) {
-                    var response = storagePool.executeActionRequest(request);
-                    if (response.success) {
-                        System.out.println("Success");
-                        System.out.println(response.result != null ? response.result : "Without result");
-                    } else {
-                        System.out.println("Error: " + response.message);
-                    }
+            if (!commandString.isEmpty())
+                if (isExit(commandString)) {
+                    stop();
                 } else {
-                    System.out.println("Request not valid");
+                    var request = createActionRequestFromCommandLine(commandString);
+
+                    if (request.valid) {
+                        var response = dictionaryClient.executeActionRequest(request);
+                        if (response.success) {
+                            System.out.println("Success");
+                            System.out.println(response.result != null ? response.result : "Without result");
+                        } else {
+                            System.out.println("Error: " + response.message);
+                        }
+                    } else {
+                        System.out.println(request.message);
+                    }
                 }
-            }
         }
     }
 
-    private ActionRequest createActionRequestFromCommandLine(String commandString) {
+    private DictionaryClientRequest createActionRequestFromCommandLine(String commandString) {
         var args = commandString.toLowerCase(Locale.ROOT).split(" ");
         Arrays.sort(args);
 
-        var request = new ActionRequest();
+        var request = new DictionaryClientRequest();
 
         if (args.length < 1 || args[0].equals("")) {
             request.message = Messages.NotEnoughArguments;
@@ -62,13 +62,13 @@ public class ConsoleService {
         }
         for (String arg : args) {
             if (arg.matches(ConsoleCommands.All)) {
-                request.command = Commands.ALL;
+                request.command = DictionaryClientCommands.ALL;
             } else if (arg.matches(ConsoleCommands.Add)) {
-                request.command = Commands.ADD;
+                request.command = DictionaryClientCommands.ADD;
             } else if (arg.matches(ConsoleCommands.Find)) {
-                request.command = Commands.FIND;
+                request.command = DictionaryClientCommands.FIND;
             } else if (arg.matches(ConsoleCommands.Delete)) {
-                request.command = Commands.DELETE;
+                request.command = DictionaryClientCommands.DELETE;
             } else if (arg.matches(ConsoleCommands.DictionaryName)) {
                 var argValues = arg.split(ConsoleCommands.ParamSeparator);
                 if (argValues.length != 2) {
@@ -77,8 +77,9 @@ public class ConsoleService {
                 } else {
                     var val = arg.split(ConsoleCommands.ParamSeparator)[1];
 
-                    request.dn = storagePool.validDictionaryName(val);
-                    if (request.dn == null) {
+                    if (dictionaryClient.dictionaryIsPresent(val)) {
+                        request.dn = val;
+                    } else {
                         request.message = Messages.NoSuchDictionary;
                         request.valid = false;
                     }
@@ -99,7 +100,7 @@ public class ConsoleService {
                     request.valid = false;
                 } else {
                     var val = arg.split(ConsoleCommands.ParamSeparator)[1];
-                    if (storagePool.isValidDictionaryWord(request.dn, val)) {
+                    if (dictionaryClient.isValidDictionaryWord(request.dn, val)) {
                         request.value = val;
                     } else {
                         request.valid = false;
@@ -115,15 +116,15 @@ public class ConsoleService {
     }
 
 
-    private  boolean isExit(String command) {
+    private boolean isExit(String command) {
         return command.matches(ConsoleCommands.Exit);
     }
 
-    private  void help() {
+    private void help() {
         System.out.println(Messages.Help);
     }
 
-    private  void welcome() {
+    private void welcome() {
         System.out.println(Messages.Welcome);
     }
 }

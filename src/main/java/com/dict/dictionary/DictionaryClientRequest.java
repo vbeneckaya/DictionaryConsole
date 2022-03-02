@@ -1,10 +1,10 @@
-package com.dict.services.DictionaryService;
+package com.dict.dictionary;
 
-public class ActionRequest {
+public class DictionaryClientRequest {
     public String dn;
     public String key;
     public String value;
-    public Commands command;
+    public DictionaryClientCommands command;
     public boolean valid = true;
     public String message = "";
 }

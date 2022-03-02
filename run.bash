@@ -14,6 +14,11 @@ if [ ! -d ./target/test/res ]; then
   mkdir ./target/test/res
 fi
 
+if [  -d ./target/com ]; then
+  echo "delete ./target/com"
+  rm -rf ./target/com
+fi
+
 #find ./src/main -name "*.java" > sources.txt
 #javac @sources.txt -d ./target
 #
