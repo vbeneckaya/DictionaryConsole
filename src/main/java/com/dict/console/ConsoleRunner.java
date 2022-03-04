@@ -1,12 +1,15 @@
 package com.dict.console;
 
-import com.dict.dictionary.DictionaryClient;
-import com.dict.dictionary.DictionaryClientRequest;
-import com.dict.dictionary.DictionaryClientCommands;
-
+import com.dict.console.dictclient.DictionaryClient;
+import com.dict.console.dictclient.DictionaryClientRequest;
+import com.dict.console.dictclient.DictionaryClientCommands;
 
 import java.util.Arrays;
 import java.util.Locale;
+
+/**
+ * <p>Обрабатывает действия пользователя в консоли</p>
+ */
 
 public class ConsoleRunner {
     private boolean isRunning;

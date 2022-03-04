@@ -1,4 +1,4 @@
-package com.dict.dictionary.storage.reader;
+package com.dict.dictionary.reader;
 
 public interface Record {
     String getKey();

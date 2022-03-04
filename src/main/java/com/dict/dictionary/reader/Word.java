@@ -1,4 +1,8 @@
-package com.dict.dictionary.storage.reader;
+package com.dict.dictionary.reader;
+
+/**
+ * Отвечает за единичную запись в словаре
+ */
 
 public class Word implements Record {
     private String key;
@@ -24,7 +28,6 @@ public class Word implements Record {
     public void setValue(String value) {
         this.value = value;
     }
-
 
     @Override
     public String toString() {

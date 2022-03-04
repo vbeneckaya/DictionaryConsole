@@ -1,4 +1,8 @@
-package com.dict.dictionary;
+package com.dict.console.dictclient;
+
+/**
+ * <p>Хранит состояние запроса (модель получения данных)</p>
+ */
 
 public class DictionaryClientRequest {
     public String dn;

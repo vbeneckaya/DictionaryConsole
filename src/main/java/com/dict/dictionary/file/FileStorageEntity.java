@@ -1,7 +1,10 @@
-package com.dict.dictionary.storage;
+package com.dict.dictionary.file;
 
-import com.dict.dictionary.storage.reader.Record;
-import com.dict.dictionary.storage.reader.Word;
+import com.dict.dictionary.config.Configuration;
+import com.dict.dictionary.config.DictionaryParameter;
+import com.dict.dictionary.reader.StorageEntity;
+import com.dict.dictionary.reader.Record;
+import com.dict.dictionary.reader.Word;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,16 +15,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DictionaryStorageEntity {
-    public String wordPattern;
-    public String file;
-    public Path path;
 
-    public DictionaryStorageEntity(String file, String wordPattern, String rootPath) {
-        this.wordPattern = wordPattern;
-        this.file = file;
-        this.path = Paths.get(rootPath, file);
-        ;
+/**
+ * Отвечает за действия одного файлового словаря
+ */
+
+public class FileStorageEntity implements StorageEntity {
+    private String wordPattern;
+    private String file;
+    private Path path;
+    private String name;
+
+    public FileStorageEntity(DictionaryParameter dictionaryParameter, Configuration configuration) {
+        this.wordPattern = dictionaryParameter.wordPattern;
+        this.name = dictionaryParameter.dictionaryName;
+        this.file = name + ".txt";
+        this.path = Paths.get(configuration.getDictionaryRoot(), file);
     }
 
     public void insert(String key, String value) {
@@ -33,7 +42,7 @@ public class DictionaryStorageEntity {
     }
 
     public String getName() {
-        return file.split("\\.")[0];
+        return name;
     }
 
     public List<Record> find(String key) {
@@ -121,7 +130,7 @@ public class DictionaryStorageEntity {
             return true;
         }
 
-        DictionaryStorageEntity d = (DictionaryStorageEntity) o;
+        FileStorageEntity d = (FileStorageEntity) o;
 
         return (this.file.equals(d.file) && this.wordPattern.equals(d.wordPattern));
     }

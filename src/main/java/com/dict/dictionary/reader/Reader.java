@@ -1,4 +1,4 @@
-package com.dict.dictionary.storage.reader;
+package com.dict.dictionary.reader;
 
 
 import java.util.List;

@@ -1,23 +1,30 @@
-package com.dict.dictionary;
+package com.dict.console.dictclient;
 
-import com.dict.dictionary.storage.DictionaryStorage;
-import com.dict.dictionary.storage.reader.Record;
-import com.dict.dictionary.storage.reader.Storage;
-import com.dict.dictionary.storage.reader.Reader;
-import com.dict.dictionary.storage.reader.FindCommand;
-import com.dict.dictionary.storage.reader.DeleteCommand;
-import com.dict.dictionary.storage.reader.ReadAllCommand;
-import com.dict.dictionary.storage.reader.AddCommand;
+import com.dict.dictionary.DictionaryStorage;
+import com.dict.dictionary.config.Configuration;
+import com.dict.dictionary.file.FileStorageEntityFactory;
+import com.dict.dictionary.reader.Record;
+import com.dict.dictionary.reader.Storage;
+import com.dict.dictionary.reader.Reader;
+import com.dict.dictionary.reader.FindCommand;
+import com.dict.dictionary.reader.DeleteCommand;
+import com.dict.dictionary.reader.ReadAllCommand;
+import com.dict.dictionary.reader.AddCommand;
 
 import java.util.List;
 
-// Знает про хранилище и выполняет комманды хранилища
+/**
+ * <p> Инициализирует хранилище и выполняет комманды хранилища</p>
+ */
+
 public class DictionaryClient {
     private Storage storage;
     private Reader storageReader;
+    private Configuration configuration;
 
     public DictionaryClient() {
-        this.storage = new DictionaryStorage();
+        this.configuration = new Configuration("./target/res");
+        this.storage = new DictionaryStorage(configuration, new FileStorageEntityFactory());
         this.storageReader = new Reader(
                 new AddCommand(storage),
                 new ReadAllCommand(storage),

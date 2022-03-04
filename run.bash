@@ -27,6 +27,9 @@ fi
 
 javac  -sourcepath src/main/java   src/main/java/com/dict/app/Word.java -d ./target -cp ./target || exit
 cp ./src/main/res/DictionaryTypes.txt ./target/res/ || exit
+cp ./src/main/res/ConnectionString.txt ./target/res/ || exit
+
+#jar cvf word.jar ./target
 
 
 java -cp ./target    com.dict.app.Word

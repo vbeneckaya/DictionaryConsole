@@ -1,16 +1,16 @@
-package com.dict.dictionary.storage.reader;
+package com.dict.dictionary.reader;
 
 import java.util.List;
 
-public class DeleteCommand implements Command{
+public class FindCommand implements Command{
     Storage storage;
 
-    public DeleteCommand(Storage storage) {
+    public FindCommand(Storage storage) {
         this.storage = storage;
     }
 
     @Override
     public List<Record> execute(String id, String key, String value) {
-        return storage.delete(id, key);
+        return storage.find(id, key);
     }
 }
