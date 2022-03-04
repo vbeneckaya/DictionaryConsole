@@ -1,6 +1,10 @@
-package com.dict.services.DictionaryService;
+package com.dict.dictionary.file;
 
-import org.jetbrains.annotations.NotNull;
+import com.dict.dictionary.config.Configuration;
+import com.dict.dictionary.config.DictionaryParameter;
+import com.dict.dictionary.reader.StorageEntity;
+import com.dict.dictionary.reader.Record;
+import com.dict.dictionary.reader.Word;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,28 +15,39 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Dict {
-    public Dict(String file, String wordPattern, String rootPath) {
-        this.file = file;
-        this.wordPattern = wordPattern;
-        this.path = Paths.get(rootPath,file);
+
+/**
+ * Отвечает за действия одного файлового словаря
+ */
+
+public class FileStorageEntity implements StorageEntity {
+    private String wordPattern;
+    private String file;
+    private Path path;
+    private String name;
+
+    public FileStorageEntity(DictionaryParameter dictionaryParameter, Configuration configuration) {
+        this.wordPattern = dictionaryParameter.wordPattern;
+        this.name = dictionaryParameter.dictionaryName;
+        this.file = name + ".txt";
+        this.path = Paths.get(configuration.getDictionaryRoot(), file);
     }
 
-    public String wordPattern;
-    public String file;
-    public Path path;
-
-    public void add(String key, String value) {
+    public void insert(String key, String value) {
         writeToFile(key, value);
     }
 
-    public String all() {
-        return readFromFile();
+    public List<Record> readAll() {
+        return readLinesFromFile().stream().map(l -> mapStringToRecord(l)).collect(Collectors.toList());
     }
 
-    public String find(String key) {
+    public String getName() {
+        return name;
+    }
+
+    public List<Record> find(String key) {
         var existLines = readLinesFromFile();
-        return existLines.stream().filter(e -> e.matches(getKeyRegexp(key))).findFirst().orElse("");
+        return existLines.stream().filter(e -> e.matches(getKeyRegexp(key))).map(l -> mapStringToRecord(l)).collect(Collectors.toList());
     }
 
     public void delete(String key) {
@@ -42,19 +57,17 @@ public class Dict {
         for (String line : newLines) {
             resString.append(line);
         }
-        if (!resString.toString().equals("")) {
-            writeToFile(resString.toString());
-        }
+
+        writeToFile(resString.toString());
     }
 
-    public boolean isValidDictionaryWord(String value){
+    public boolean isValidStorageEntityWord(String value) {
         return value.matches(wordPattern);
     }
 
-    public boolean isValidDictionaryName(String name){
-        return file.matches("^" + name + "(\\..+)?$");
+    public boolean isValidStorageEntityName(String name) {
+        return name.equals(getName());
     }
-
 
     private void writeToFile(String data) {
         try {
@@ -86,7 +99,7 @@ public class Dict {
         }
     }
 
-    private @NotNull List<String> readLinesFromFile() {
+    private List<String> readLinesFromFile() {
         if (!Files.exists(path)) {
             return new ArrayList<>();
         }
@@ -95,20 +108,16 @@ public class Dict {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return  new ArrayList<>();
-    }
-
-    private String readFromFile() {
-        try {
-            return Files.readString(path);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return new ArrayList<>();
     }
 
     private String getKeyRegexp(String key) {
         return "^" + key + " .*";
+    }
+
+    private Record mapStringToRecord(String line) {
+        var splits = line.split(" ");
+        return new Word(splits[0], splits[1]);
     }
 
 
@@ -121,9 +130,8 @@ public class Dict {
             return true;
         }
 
-        Dict d = (Dict) o;
+        FileStorageEntity d = (FileStorageEntity) o;
 
         return (this.file.equals(d.file) && this.wordPattern.equals(d.wordPattern));
     }
 }
-

@@ -1,4 +1,8 @@
-package com.dict.services.ConsoleService;
+package com.dict.console;
+
+/**
+ * <p>Хранит выводимые программой сообщения на действия пользователя в консоли</p>
+ */
 
 public class Messages {
     public static String NotEnoughArguments = "Not enough arguments";
