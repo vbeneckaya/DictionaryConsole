@@ -9,17 +9,17 @@ import java.util.stream.Collectors;
  */
 
 public class ParametersString {
-    private List<String[]> splitedData;
+    private List<String[]> splittedData;
     private String paramSeparator = ";";
     private String valueSeparator = "=";
 
     public ParametersString(String params) {
-        this.splitedData = splitConnectionString(params);
+        this.splittedData = splitConnectionString(params);
     }
 
     public String getValueByKey(String key) {
-        var res = splitedData.stream().filter(e -> e[0].equals(key)).findFirst();
-        return res.isPresent() ? "" : res.get()[1];
+        var res = splittedData.stream().filter(e -> e[0].equals(key)).findFirst();
+        return res.isPresent() ? res.get()[1] : "";
     }
 
     private List<String[]> splitConnectionString(String params) {
