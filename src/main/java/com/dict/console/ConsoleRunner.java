@@ -2,7 +2,8 @@ package com.dict.console;
 
 import com.dict.console.dictclient.DictionaryClient;
 import com.dict.console.dictclient.DictionaryClientRequest;
-import com.dict.console.dictclient.DictionaryClientCommands;
+import com.dict.console.reader.ConsoleReader;
+
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -13,6 +14,13 @@ import java.util.Locale;
 
 public class ConsoleRunner {
     private boolean isRunning;
+    private DictionaryClient dictionaryClient;
+    private ConsoleReader consoleReader;
+
+    public ConsoleRunner(DictionaryClient dictionaryClient, ConsoleReader reader) {
+        this.dictionaryClient = dictionaryClient;
+        this.consoleReader = reader;
+    }
 
     public boolean isRunning() {
         return isRunning;
@@ -21,8 +29,6 @@ public class ConsoleRunner {
     public void stop() {
         isRunning = false;
     }
-
-    DictionaryClient dictionaryClient = new DictionaryClient();
 
     public void run() {
         isRunning = true;
@@ -33,10 +39,10 @@ public class ConsoleRunner {
             var commandString = System.console().readLine();
 
             if (!commandString.isEmpty())
-                if (isExit(commandString)) {
+                if (consoleReader.isExitCommand(commandString)) {
                     stop();
                 } else {
-                    var request = createActionRequestFromCommandLine(commandString);
+                    var request = createDictionaryClientRequestFromCommandLine(commandString);
 
                     if (request.valid) {
                         var response = dictionaryClient.executeActionRequest(request);
@@ -53,7 +59,7 @@ public class ConsoleRunner {
         }
     }
 
-    private DictionaryClientRequest createActionRequestFromCommandLine(String commandString) {
+    private DictionaryClientRequest createDictionaryClientRequestFromCommandLine(String commandString) {
         var args = commandString.toLowerCase(Locale.ROOT).split(" ");
         Arrays.sort(args);
 
@@ -64,63 +70,44 @@ public class ConsoleRunner {
             return request;
         }
         for (String arg : args) {
-            if (arg.matches(ConsoleCommands.All)) {
-                request.command = DictionaryClientCommands.ALL;
-            } else if (arg.matches(ConsoleCommands.Add)) {
-                request.command = DictionaryClientCommands.ADD;
-            } else if (arg.matches(ConsoleCommands.Find)) {
-                request.command = DictionaryClientCommands.FIND;
-            } else if (arg.matches(ConsoleCommands.Delete)) {
-                request.command = DictionaryClientCommands.DELETE;
-            } else if (arg.matches(ConsoleCommands.DictionaryName)) {
-                var argValues = arg.split(ConsoleCommands.ParamSeparator);
-                if (argValues.length != 2) {
-                    request.message = Messages.DnValueError;
-                    request.valid = false;
-                } else {
-                    var val = arg.split(ConsoleCommands.ParamSeparator)[1];
-
-                    if (dictionaryClient.dictionaryIsPresent(val)) {
-                        request.dn = val;
-                    } else {
-                        request.message = Messages.NoSuchDictionary;
-                        request.valid = false;
-                    }
-
-                }
-            } else if (arg.matches(ConsoleCommands.Key)) {
-                var argValues = arg.split(ConsoleCommands.ParamSeparator);
-                if (argValues.length != 2) {
-                    request.valid = false;
-                    request.message = Messages.KeyValueError;
-                } else {
-                    request.key = arg.split(ConsoleCommands.ParamSeparator)[1];
-                }
-            } else if (arg.matches(ConsoleCommands.Value)) {
-                var argValues = arg.split(ConsoleCommands.ParamSeparator);
-                if (argValues.length != 2) {
-                    request.message = Messages.ValueValueError;
-                    request.valid = false;
-                } else {
-                    var val = arg.split(ConsoleCommands.ParamSeparator)[1];
-                    if (dictionaryClient.isValidDictionaryWord(request.dn, val)) {
-                        request.value = val;
-                    } else {
-                        request.valid = false;
-                        request.message = Messages.NotValidValue;
-                    }
-                }
-            } else {
-                request.message = Messages.WrongArgument;
-                request.valid = false;
+            if (consoleReader.isAllCommand(arg)) {
+                request = consoleReader.all(request, arg);
+                continue;
             }
+
+            if (consoleReader.isAddCommand(arg)) {
+                request = consoleReader.add(request, arg);
+                continue;
+            }
+
+            if (consoleReader.isFindCommand(arg)) {
+                request = consoleReader.find(request, arg);
+                continue;
+            }
+
+            if (consoleReader.isDeleteCommand(arg)) {
+                request = consoleReader.delete(request, arg);
+                continue;
+            }
+            if (consoleReader.isDictionaryNameCommand(arg)) {
+                request = consoleReader.dictionaryName(request, arg);
+                continue;
+            }
+
+            if (consoleReader.isKeyCommand(arg)) {
+                request = consoleReader.key(request, arg);
+                continue;
+            }
+
+            if (consoleReader.isValueCommand(arg)) {
+                request = consoleReader.value(request, arg);
+                continue;
+            }
+            request.message = Messages.WrongArgument;
+            request.valid = false;
+            return request;
         }
         return request;
-    }
-
-
-    private boolean isExit(String command) {
-        return command.matches(ConsoleCommands.Exit);
     }
 
     private void help() {
